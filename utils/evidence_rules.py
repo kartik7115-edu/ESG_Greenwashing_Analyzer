@@ -1,0 +1,21 @@
+evidence_phrases = [
+    "verified",
+    "certified",
+    "measured",
+    "audited",
+    "reported",
+    "quantified",
+    "third-party",
+    "iso",
+    "standard",
+    "assessment",
+    "metric tons",
+    "percent",
+    "reduced emissions",
+    "renewable energy",
+    "scope 1",
+    "scope 2",
+    "scope 3",
+    "science based targets initiative",
+    "sbti"
+]
