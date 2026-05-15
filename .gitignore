@@ -1,4 +1,23 @@
+# Virtual Environment
 venv/
+.env/
+
+# Python Cache
 __pycache__/
-.ipynb_checkpoints/
 *.pyc
+
+# Streamlit Cache
+.streamlit/
+
+# OS Files
+.DS_Store
+Thumbs.db
+
+# Large Sample Files
+*.pdf
+
+# VS Code
+.vscode/
+
+# Temporary Files
+temp.pdf
