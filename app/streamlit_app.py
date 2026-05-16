@@ -2,21 +2,28 @@ import streamlit as st
 import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
+import sys
+import os
 
+sys.path.append(
+    os.path.abspath(
+        os.path.join(os.path.dirname(__file__), "..")
+    )
+)
+
+from utils.finbert_analyzer import analyze_sentiment
 from utils.pdf_extractor import extract_text_from_pdf
 from utils.text_cleaner import clean_text
 from utils.sentence_extractor import extract_esg_sentences
-
 from utils.greenwashing_detector import detect_suspicious_sentences
 from utils.evidence_detector import detect_evidence_sentences
-
 from utils.risk_scoring import calculate_greenwashing_risk
 from utils.risk_interpreter import interpret_risk
 
 
-# -------------------------------
+# -----------------------------------
 # PAGE CONFIG
-# -------------------------------
+# -----------------------------------
 
 st.set_page_config(
     page_title="ESG Greenwashing Analyzer",
@@ -25,9 +32,9 @@ st.set_page_config(
 )
 
 
-# -------------------------------
+# -----------------------------------
 # CUSTOM CSS
-# -------------------------------
+# -----------------------------------
 
 st.markdown("""
 <style>
@@ -55,9 +62,9 @@ h1, h2, h3 {
 """, unsafe_allow_html=True)
 
 
-# -------------------------------
+# -----------------------------------
 # TITLE
-# -------------------------------
+# -----------------------------------
 
 st.title("🌱 ESG Greenwashing Analyzer")
 
@@ -66,9 +73,9 @@ Analyze ESG reports for potential greenwashing risk using NLP and sustainability
 """)
 
 
-# -------------------------------
+# -----------------------------------
 # FILE UPLOAD
-# -------------------------------
+# -----------------------------------
 
 uploaded_file = st.file_uploader(
     "Upload ESG Report PDF",
@@ -76,36 +83,41 @@ uploaded_file = st.file_uploader(
 )
 
 
-# -------------------------------
+# -----------------------------------
 # MAIN PIPELINE
-# -------------------------------
+# -----------------------------------
 
 if uploaded_file is not None:
 
-    # Save temporary PDF
+    # Save uploaded PDF temporarily
     with open("temp.pdf", "wb") as f:
         f.write(uploaded_file.read())
 
-    # Extract text
+    # Extract text from PDF
     raw_text = extract_text_from_pdf("temp.pdf")
 
-    # Clean text
+    # Clean extracted text
     cleaned_text = clean_text(raw_text)
 
-    # ESG sentence extraction
+    # Extract ESG-related sentences
     esg_sentences = extract_esg_sentences(cleaned_text)
 
-    # Suspicious claims
+    # Detect suspicious ESG claims
     suspicious_sentences = detect_suspicious_sentences(
         esg_sentences
     )
 
-    # Evidence-based claims
+    # Detect evidence-based ESG claims
     evidence_sentences = detect_evidence_sentences(
         esg_sentences
     )
 
-    # Risk score
+    # FinBERT sentiment analysis
+    sentiment_results = analyze_sentiment(
+        esg_sentences[:30]
+    )
+
+    # Calculate risk score
     risk_score = calculate_greenwashing_risk(
         total_esg_sentences=len(esg_sentences),
         suspicious_sentences=len(suspicious_sentences),
@@ -115,9 +127,25 @@ if uploaded_file is not None:
     # Risk interpretation
     risk_level = interpret_risk(risk_score)
 
-    # -------------------------------
+    # Sentiment counts
+    positive_count = sum(
+        1 for r in sentiment_results
+        if r["label"].lower() == "positive"
+    )
+
+    negative_count = sum(
+        1 for r in sentiment_results
+        if r["label"].lower() == "negative"
+    )
+
+    neutral_count = sum(
+        1 for r in sentiment_results
+        if r["label"].lower() == "neutral"
+    )
+
+    # -----------------------------------
     # METRICS
-    # -------------------------------
+    # -----------------------------------
 
     st.divider()
 
@@ -145,9 +173,9 @@ if uploaded_file is not None:
         f"{risk_score}/100"
     )
 
-    # -------------------------------
+    # -----------------------------------
     # RISK INTERPRETATION
-    # -------------------------------
+    # -----------------------------------
 
     st.subheader("🧠 Risk Interpretation")
 
@@ -160,9 +188,9 @@ if uploaded_file is not None:
     else:
         st.error(risk_level)
 
-    # -------------------------------
-    # RISK GAUGE CHART
-    # -------------------------------
+    # -----------------------------------
+    # RISK GAUGE
+    # -----------------------------------
 
     st.subheader("🎯 Greenwashing Risk Gauge")
 
@@ -186,9 +214,9 @@ if uploaded_file is not None:
         use_container_width=True
     )
 
-    # -------------------------------
+    # -----------------------------------
     # ESG OVERVIEW BAR CHART
-    # -------------------------------
+    # -----------------------------------
 
     st.subheader("📈 ESG Analysis Overview")
 
@@ -218,9 +246,40 @@ if uploaded_file is not None:
         use_container_width=True
     )
 
-    # -------------------------------
+    # -----------------------------------
+    # FINBERT SENTIMENT ANALYSIS
+    # -----------------------------------
+
+    st.subheader("🤖 FinBERT ESG Sentiment Analysis")
+
+    sentiment_df = pd.DataFrame({
+        "Sentiment": [
+            "Positive",
+            "Neutral",
+            "Negative"
+        ],
+        "Count": [
+            positive_count,
+            neutral_count,
+            negative_count
+        ]
+    })
+
+    sentiment_fig = px.pie(
+        sentiment_df,
+        names="Sentiment",
+        values="Count",
+        title="FinBERT ESG Sentiment Distribution"
+    )
+
+    st.plotly_chart(
+        sentiment_fig,
+        use_container_width=True
+    )
+
+    # -----------------------------------
     # PIE CHART
-    # -------------------------------
+    # -----------------------------------
 
     st.subheader("🧩 ESG Claim Composition")
 
@@ -247,9 +306,9 @@ if uploaded_file is not None:
         use_container_width=True
     )
 
-    # -------------------------------
+    # -----------------------------------
     # SUSPICIOUS CLAIMS
-    # -------------------------------
+    # -----------------------------------
 
     st.divider()
 
@@ -265,9 +324,9 @@ if uploaded_file is not None:
             "No suspicious ESG claims detected."
         )
 
-    # -------------------------------
+    # -----------------------------------
     # EVIDENCE CLAIMS
-    # -------------------------------
+    # -----------------------------------
 
     st.subheader("✅ Evidence-Based ESG Statements")
 
@@ -281,18 +340,48 @@ if uploaded_file is not None:
             "No evidence-based ESG statements detected."
         )
 
-    # -------------------------------
+    # -----------------------------------
+    # FINBERT SENTENCE ANALYSIS
+    # -----------------------------------
+
+    st.subheader("🧠 FinBERT Sentence Intelligence")
+
+    for result in sentiment_results[:10]:
+
+        sentence = result["sentence"]
+        label = result["label"]
+        score = result["score"]
+
+        if label.lower() == "positive":
+
+            st.success(
+                f"{label.upper()} ({score}) → {sentence}"
+            )
+
+        elif label.lower() == "negative":
+
+            st.error(
+                f"{label.upper()} ({score}) → {sentence}"
+            )
+
+        else:
+
+            st.info(
+                f"{label.upper()} ({score}) → {sentence}"
+            )
+
+    # -----------------------------------
     # RAW ESG SENTENCES
-    # -------------------------------
+    # -----------------------------------
 
     with st.expander("📄 View Extracted ESG Sentences"):
 
         for sentence in esg_sentences[:50]:
             st.write(sentence)
 
-    # -------------------------------
+    # -----------------------------------
     # SUMMARY
-    # -------------------------------
+    # -----------------------------------
 
     st.divider()
 
@@ -310,15 +399,14 @@ if uploaded_file is not None:
 ### Interpretation
 
 This ESG report contains a combination of:
-- sustainability commitments,
-- operational disclosures,
-- measurable environmental metrics,
-- and future-oriented ESG initiatives.
+- sustainability commitments
+- operational disclosures
+- measurable environmental metrics
+- future-oriented ESG initiatives
 
 The detected risk score reflects the balance between:
 - vague/promotional ESG language
-and
-- evidence-backed sustainability disclosures.
+- evidence-backed sustainability disclosures
 """)
 
 else:

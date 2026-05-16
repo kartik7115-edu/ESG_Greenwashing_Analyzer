@@ -1,23 +1,29 @@
 # Virtual Environment
 venv/
-.env/
+dsvenv/
+env/
 
-# Python Cache
+# Models
+models/
+
+# Temporary files
+temp.pdf
+
+# Reports/Data
+data/
+reports/
+notebooks/
+
+# Python cache
 __pycache__/
 *.pyc
 
-# Streamlit Cache
+# IDE
+.vscode/
+.idea/
+
+# Streamlit
 .streamlit/
 
-# OS Files
-.DS_Store
-Thumbs.db
-
-# Large Sample Files
-*.pdf
-
-# VS Code
-.vscode/
-
-# Temporary Files
-temp.pdf
+# HuggingFace
+.cache/
