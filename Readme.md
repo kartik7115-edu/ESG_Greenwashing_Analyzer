@@ -227,7 +227,7 @@ Greenwashing has become a major issue in sustainability reporting. This project 
 
 Try the deployed application here:
 
-👉 [ESG Greenwashing Analyzer Live App](https://your-deployment-link.streamlit.app)
+👉 [ESG Greenwashing Analyzer Live App](https://esggreenwashinganalyzer-ads3wsthdbsfv8wvzlsrfe.streamlit.app/)
 
 ---
 
