@@ -1,13 +1,26 @@
 from transformers import pipeline
 
-# Load FinBERT pipeline
-finbert_pipeline = pipeline(
-    "sentiment-analysis",
-    model="ProsusAI/finbert"
-)
+# Lazy-loaded pipeline
+finbert_pipeline = None
+
+
+def get_pipeline():
+
+    global finbert_pipeline
+
+    if finbert_pipeline is None:
+
+        finbert_pipeline = pipeline(
+            "sentiment-analysis",
+            model="ProsusAI/finbert"
+        )
+
+    return finbert_pipeline
 
 
 def analyze_sentiment(sentences):
+
+    pipe = get_pipeline()
 
     results = []
 
@@ -15,15 +28,15 @@ def analyze_sentiment(sentences):
 
         try:
 
-            prediction = finbert_pipeline(sentence[:512])[0]
+            prediction = pipe(sentence[:512])[0]
 
             results.append({
                 "sentence": sentence,
                 "label": prediction["label"],
-                "score": round(prediction["score"], 4)
+                "score": round(prediction["score"], 3)
             })
 
-        except Exception as e:
+        except Exception:
 
             results.append({
                 "sentence": sentence,
