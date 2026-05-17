@@ -1,26 +1,20 @@
 from transformers import pipeline
-
-# Lazy-loaded pipeline
-finbert_pipeline = None
+import streamlit as st
 
 
-def get_pipeline():
+@st.cache_resource
+def load_pipeline():
 
-    global finbert_pipeline
-
-    if finbert_pipeline is None:
-
-        finbert_pipeline = pipeline(
-            "sentiment-analysis",
-            model="ProsusAI/finbert"
-        )
-
-    return finbert_pipeline
+    return pipeline(
+        "sentiment-analysis",
+        model="ProsusAI/finbert",
+        framework="pt"
+    )
 
 
 def analyze_sentiment(sentences):
 
-    pipe = get_pipeline()
+    pipe = load_pipeline()
 
     results = []
 
