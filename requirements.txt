@@ -3,6 +3,6 @@ pandas
 plotly
 PyMuPDF
 scikit-learn
-numpy
 transformers
+torch
 sentencepiece
