@@ -2,7 +2,6 @@ streamlit
 pandas
 plotly
 PyMuPDF
-nltk
 scikit-learn
 numpy
 transformers
