@@ -1,9 +1,4 @@
-import nltk
-from nltk.tokenize import sent_tokenize
-
-# Download tokenizer resources
-nltk.download("punkt")
-nltk.download("punkt_tab")
+import re
 
 ESG_KEYWORDS = [
     "sustainability",
@@ -27,7 +22,8 @@ ESG_KEYWORDS = [
 
 def extract_esg_sentences(text):
 
-    sentences = sent_tokenize(text)
+    # Simple sentence splitting
+    sentences = re.split(r'(?<=[.!?])\s+', text)
 
     esg_sentences = []
 
@@ -37,6 +33,6 @@ def extract_esg_sentences(text):
 
         if any(keyword in sentence_lower for keyword in ESG_KEYWORDS):
 
-            esg_sentences.append(sentence)
+            esg_sentences.append(sentence.strip())
 
     return esg_sentences
